@@ -3,6 +3,9 @@ import kepler
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 
+# указание конечного времени, до которого будет произведен расчет параметров движения
+time = 20000
+
 #НУ положения, скорости КА и времени
 position  = [4362521.19692133, -2174459.71448059, 4720847.40402189] 
 speed = [5356.39915538069, 4741.41348686709, -2761.5472632395]
@@ -42,38 +45,45 @@ E0 = np.arctan2(np.dot(position, speed) / (np.sqrt(mu_z*a)), 1 - r/a)
 M0 = E0 - np.dot(position, speed)/(np.sqrt(mu_z*a))
 # период обращения 
 T = 2 * np.pi * np.sqrt(a**3/mu_z)
-t = 0*T
-delta_t = (t - t0) 
-# while delta_t >= T:
+
+#delta_t = (t - t0) 
+#if delta_t >= T:
 #     delta_t -= T
 #delta_t = 0  
 coordinates_X = []
 coordinates_Y = []
 coordinates_Z = []
-#for i in range((int(T))):
-
-# M = M0 + delta_t * np.sqrt(mu_z/a**3)
-# E, cos_true_anomaly, sin_true_anomaly = kepler.kepler(M, e)
-#true_anomaly = E + 2 * np.arctan(e * np.sin(E)/ (1 + np.sqrt(1 - e**2) - e * np.cos(E)))
-
-
+velocity_X = []
+velocity_Y = []
+velocity_Z = []
+delta_t = 0
+# матрицы пересчета координат и скоростей
 matrix = np.array([[np.cos(w) * np.cos(peric) - np.sin(w) * np.sin(peric) * np.cos(i)],
  				[np.sin(w) * np.cos(peric) + np.cos(w) * np.sin(peric) * np.cos(i)],
  				[np.sin(peric) * np.sin(i)]])
 matrix1 = np.array([[- np.cos(w) * np.sin(peric) - np.sin(w) * np.cos(peric) * np.cos(i)],
  				[-np.sin(w) * np.sin(peric) + np.cos(w) * np.cos(peric) * np.cos(i)],
  				[np.cos(peric) * np.sin(i)]])
-# delta_t += 1
-X,Y,Z = a *( matrix * (np.cos(E0) - e) + matrix1 * (np.sqrt(1 - e**2) * np.sin(E0)))
-print(X, Y, Z)
-
-
-
-# fig = plt.figure()
-# ax = fig.add_subplot(111, projection='3d')
-# #ax.plot(coordinates_X, coordinates_Y, coordinates_Z)
-# plt.plot(coordinates_X, coordinates_Y)
-# plt.show()
+# расчет параметров траекторного движения на заданном временном инетрвале
+for i in range(int(time)):
+	M = M0 + delta_t * np.sqrt(mu_z/a**3)
+	E, cos_true_anomaly, sin_true_anomaly = kepler.kepler(M, e)
+	delta_t += 1
+	X,Y,Z = a *( matrix * (np.cos(E) - e) + matrix1 * (np.sqrt(1 - e**2) * np.sin(E)))
+	coordinates_X.append(float(X))
+	coordinates_Y.append(float(Y))
+	coordinates_Z.append(float(Z))
+	vel_x, vel_y, vel_z = (np.sqrt(mu_z / a) / (1 - e * np.cos(E))) * (- matrix) * np.sin(E) + matrix1 * (np.sqrt(1 - e**2) * np.cos(E))
+	velocity_X.append(float(vel_x))
+	velocity_Y.append(float(vel_y))
+	velocity_Z.append(float(vel_z))
+print(E)
+fig = plt.figure()
+ax = fig.add_subplot(111, projection='3d')
+ax.plot(coordinates_X, coordinates_Y, coordinates_Z)
+#ax.plot(vel_x, coordinates_Y, coordinates_Z)
+#plt.plot(velocity_Y)
+plt.show()
 
 # Y = 2022
 # M = 2

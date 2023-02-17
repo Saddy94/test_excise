@@ -6,8 +6,7 @@ from mpl_toolkits.mplot3d import Axes3D
 #НУ положения, скорости КА и времени
 position  = [4362521.19692133, 2174459.71448059, -4720847.40402189] 
 speed = [5356.39915538069, 4741.41348686709, -2761.5472632395]
-#position  = [2937656.611, 14432705.729, -20836304.223] 
-#speed = [-2408.799, 2723.781, 1545.981]
+
 t0 = 0#86400 *  8084.05644194318
 # G * M
 mu_z = 0.000000000066743016 * 5972200000000000000000000  
@@ -54,10 +53,14 @@ matrix = np.array([[np.cos(omega) * np.cos(u) - np.sin(omega) * np.sin(u) * np.c
 				[np.sin(u) * np.sin(i)]])
 
 X,Y,Z = r_ * matrix 
-# coordinates_X.append(float(X))
-# coordinates_Y.append(float(Y))
-# coordinates_Z.append(float(Z))
-#print(X, Y, Z)
-print(i, omega, a)
+Y = 2022
+M = 2
+D = 18
+TIME = (18) + (54/60) + (36.584)/(3600) #+ 7.7375745507902958333333333333333
+JD = 367* Y - int(7*(Y + int((M + 9)/12))/4) - int(3*(int((Y + (M - 9)/7)/100) + 1)/4) + int(275*M/9) + D + 1721028.5 + TIME/24 
+JD2020 = JD - 2451545.0
+print(JD2020)
+#8084.2879118519668084
+#print(i, omega, a)
 
 

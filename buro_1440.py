@@ -35,28 +35,23 @@ TIME_BEGIN = 0
 TIME_END = 20000
 
 
-start_pos = {'x': 4362521.19692133, 'y': -
+START_POS = {'x': 4362521.19692133, 'y': -
              2174459.71448059, 'z': 4720847.40402189}
-start_velocity = {'vel_x': 5356.39915538069,
+START_VEL = {'vel_x': 5356.39915538069,
                   'vel_y': 4741.41348686709, 'vel_z': -2761.5472632395}
-target_point = {'lat': 45.920266, 'lon': 63.342286}
-jd_start = 8084.05644194318
-
-# position_norm = np.linalg.norm([*start_pos.values()], ord=2)
-# velocity_norm = np.linalg.norm([*start_velocity.values()], ord=2)
+TARGET_POINT = {'lat': 45.920266, 'lon': 63.342286}
+JD_START = 8084.05644194318
 
 
 class Orbit():
-    """
-    """
     def __init__(self, start_pos, start_velocity):
         self._start_pos = start_pos
         self._start_velocity = start_velocity
-        self._position_norm = np.linalg.norm([*start_pos.values()], ord=2)
-        self._velocity_norm = np.linalg.norm([*start_velocity.values()], ord=2)
+        self._position_norm = None
+        self._velocity_norm = None
         self._orbital_momentum = None
-        self._keplerian_energy = None
         self._orbital_momentum_norm = None
+        self._keplerian_energy = None
         self._focal_distance = None
         self._semi_major_axis = None
         self._eccentricity = None
@@ -68,80 +63,93 @@ class Orbit():
         self._mean_anomaly = None
         self._average_distance = None
 
-    def keplerian_energy(self):
-        if not self._keplerian_energy:
-            self._keplerian_energy = ((self._velocity_norm ** 2) / 2) - \
-                (MU / self._position_norm)
-        return self._keplerian_energy
-
-    def orbital_momentum(self):
-        if not isinstance(self._orbital_momentum, np.ndarray):
-            self._orbital_momentum = np.cross(
-                list(self._start_pos.values()), list(self._start_velocity.values()))
+    def get_orbital_momentum(self):
         return self._orbital_momentum
 
-    def orbital_momentum_norm(self):
-        if not self._orbital_momentum_norm:
-            self._orbital_momentum_norm = np.linalg.norm(
-                self.orbital_momentum())
+    def get_orbital_momentum_norm(self):
         return self._orbital_momentum_norm
 
-    def focal_distance(self):
-        if not self._focal_distance:
-            self._focal_distance = self.orbital_momentum_norm() ** 2 / MU
+    def get_keplerian_energy(self):
+        return self._keplerian_energy
+
+    def get_focal_distance(self):
         return self._focal_distance
 
-    def semi_major_axis(self):
-        if not self._semi_major_axis:
-            self._semi_major_axis = - MU / (2 * self.keplerian_energy())
+    def get_semi_major_axis(self):
         return self._semi_major_axis
 
-    def eccentricity(self):
-        if not self._eccentricity:
-            self._eccentricity = np.sqrt(
-                (1 + (2 * self.keplerian_energy()) * (self.orbital_momentum_norm() ** 2 / MU ** 2)))
+    def get_eccentricity(self):
         return self._eccentricity
 
-    def inclination(self):
-        if not self._inclination:
-            self._inclination = np.arccos(self.orbital_momentum()[
-                2] / self.orbital_momentum_norm())
+    def get_inclination(self):
         return self._inclination
 
-    def ascending_node(self):
-        if not self._ascending_node:
-            self._ascending_node = np.arctan2(self.orbital_momentum()[
-                0], - self.orbital_momentum()[1])
+    def get_ascending_node(self):
         return self._ascending_node
 
-    def true_anomaly(self):
-        if not self._true_anomaly:
-            self._true_anomaly = np.arctan2(np.dot(list(self._start_pos.values()), list(self._start_velocity.values())) / self.orbital_momentum_norm(),
-                                            1 - self._position_norm / self.focal_distance())
+    def get_true_anomaly(self):
         return self._true_anomaly
 
-    def periapsis_arg(self):
-        if not self._periapsis_arg:
-            self._periapsis_arg = np.arctan2(self._start_pos['z'],
-                                             (self._start_pos['y'] * self.orbital_momentum()[0] - self._start_pos['x'] * self.orbital_momentum()[1]) / self.orbital_momentum_norm()) - self.true_anomaly()
+    def get_periapsis_arg(self):
         return self._periapsis_arg
 
-    def ecc_anomaly(self):
-        if not self._ecc_anomaly:
-            self._ecc_anomaly = np.arctan2(np.dot(list(self._start_pos.values()), list(self._start_velocity.values())) /
-                                           (np.sqrt(MU * self.semi_major_axis())), 1 - self._position_norm / self.semi_major_axis())
+    def get_ecc_anomaly(self):
         return self._ecc_anomaly
 
-    def mean_anomaly(self):
-        if not self._mean_anomaly:
-            self._mean_anomaly = self.ecc_anomaly() - np.dot(list(self._start_pos.values()),
-                                                             list(self._start_velocity.values()) / (np.sqrt(MU * self.semi_major_axis())))
+    def get_mean_anomaly(self):
         return self._mean_anomaly
 
-    def average_distance(self):
-        if not self._average_distance:
-            self._average_distance = np.sqrt(MU / self.semi_major_axis() ** 3)
+    def get_average_distance(self):
         return self._average_distance
+
+
+def construct_orbit(start_pos, start_velocity):
+    orbit = Orbit(start_pos, start_velocity)
+
+    position_projections = list(orbit._start_pos.values())
+    velocity_projections = list(orbit._start_velocity.values())
+
+    orbit._position_norm = np.linalg.norm(position_projections, ord=2)
+
+    orbit._velocity_norm = np.linalg.norm(velocity_projections, ord=2)
+
+    orbit._orbital_momentum = np.cross(
+        position_projections, velocity_projections)
+
+    orbit._keplerian_energy = ((orbit._velocity_norm ** 2) / 2) - \
+        (MU / orbit._position_norm)
+
+    orbit._orbital_momentum_norm = np.linalg.norm(
+        orbit._orbital_momentum)
+
+    orbit._focal_distance = orbit._orbital_momentum_norm ** 2 / MU
+
+    orbit._semi_major_axis = - MU / (2 * orbit._keplerian_energy)
+
+    orbit._eccentricity = np.sqrt(
+        (1 + (2 * orbit._keplerian_energy) * (orbit._orbital_momentum_norm ** 2 / MU ** 2)))
+
+    orbit._inclination = np.arccos(orbit._orbital_momentum[
+        2] / orbit._orbital_momentum_norm)
+
+    orbit._ascending_node = np.arctan2(orbit._orbital_momentum[
+        0], - orbit._orbital_momentum[1])
+
+    orbit._true_anomaly = np.arctan2(np.dot(position_projections, velocity_projections) / orbit._orbital_momentum_norm,
+                                     1 - orbit._position_norm / orbit._focal_distance)
+
+    orbit._periapsis_arg = np.arctan2(orbit._start_pos['z'],
+                                      (orbit._start_pos['y'] * orbit._orbital_momentum[0] - orbit._start_pos['x'] * orbit._orbital_momentum[1]) / orbit._orbital_momentum_norm) - orbit._true_anomaly
+
+    orbit._ecc_anomaly = np.arctan2(np.dot(position_projections, velocity_projections) /
+                                    (np.sqrt(MU * orbit._semi_major_axis)), 1 - orbit._position_norm / orbit._semi_major_axis)
+
+    orbit._mean_anomaly = orbit._ecc_anomaly - np.dot(position_projections,
+                                                      velocity_projections) / (np.sqrt(MU * orbit._semi_major_axis))
+
+    orbit._average_distance = np.sqrt(MU / orbit._semi_major_axis ** 3)
+
+    return orbit
 
 
 coordinates_X = []
@@ -151,16 +159,14 @@ velocity_X = []
 velocity_Y = []
 velocity_Z = []
 Ecc = []
-orbit = Orbit(start_pos, start_velocity)
-# матрицы пересчета координат и скоростей
-periapsis_arg = orbit.periapsis_arg()
-inclination = orbit.inclination()
-ascending_node = orbit.ascending_node()
-eccentricity = orbit.eccentricity()
-semi_major_axis = orbit.semi_major_axis()
-true_anomaly = orbit.true_anomaly()
-focal_distance = orbit.focal_distance()
-# print(periapsis_arg)
+orbit = construct_orbit(START_POS, START_VEL)
+periapsis_arg = orbit.get_periapsis_arg()
+inclination = orbit.get_inclination()
+ascending_node = orbit.get_ascending_node()
+eccentricity = orbit.get_eccentricity()
+semi_major_axis = orbit.get_semi_major_axis()
+true_anomaly = orbit.get_true_anomaly()
+focal_distance = orbit.get_focal_distance()
 print(inclination)
 print(ascending_node)
 print(true_anomaly)
@@ -188,9 +194,9 @@ JD2020 = JD - 2451545.0
 def process(time_begin, time_end, delta_t=1):
     with open('result.txt', 'w') as f:
         for i in range(int(time_end)):
-            M = orbit.mean_anomaly() + 0 * orbit.average_distance()
+            M = orbit.get_mean_anomaly() + 0 * orbit.get_average_distance()
             E, cos_true_anomaly, sin_true_anomaly = kepler.kepler(
-                M, orbit.eccentricity())
+                M, orbit.get_eccentricity())
             X, Y, Z = semi_major_axis * (matrix * (np.cos(E) - eccentricity) + matrix1 *
                                          (np.sqrt(1 - eccentricity ** 2) * np.sin(E)))
 

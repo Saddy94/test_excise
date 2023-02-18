@@ -34,7 +34,6 @@ MU = G * ME
 TIME_BEGIN = 0
 TIME_END = 20000
 
-
 START_POS = {'x': 4362521.19692133, 'y': -
              2174459.71448059, 'z': 4720847.40402189}
 START_VEL = {'vel_x': 5356.39915538069,
@@ -183,10 +182,13 @@ class Satellite():
 
         x_eci, y_eci, z_eci = semi_major_axis * (self._transform_matrix * (np.cos(ecc_anomaly) - eccentricity) + self._transform_matrix1 *
                                                  np.sqrt(1 - eccentricity ** 2) * np.sin(ecc_anomaly))
+
         vel_x, vel_y, vel_z = (np.sqrt(MU / semi_major_axis) / (1 - eccentricity * np.cos(ecc_anomaly))) * (- self._transform_matrix) * np.sin(ecc_anomaly) + self._transform_matrix1 * (
             np.sqrt(1 - eccentricity ** 2) * np.cos(ecc_anomaly))
+            
         julian_date = JD_START + delta_t / (3600 * 24)
-        return julian_date, x_eci, y_eci, z_eci, vel_x, vel_y, vel_z
+
+        return [julian_date, float(x_eci), float(y_eci), float(z_eci), float(vel_x), float(vel_y), float(vel_z)]
 
 
 def construct_satellite(START_POS, START_VEL):
@@ -205,6 +207,10 @@ def construct_satellite(START_POS, START_VEL):
     return satellite
 
 
+def convert_data_to_str(data):
+    result = ' '.join(str(i) for i in data) + '\n'
+    return result
+
 # coordinates_X = []
 # coordinates_Y = []
 # coordinates_Z = []
@@ -212,24 +218,20 @@ def construct_satellite(START_POS, START_VEL):
 # velocity_Y = []
 # velocity_Z = []
 # Ecc = []
-
-#  TODO: разобраться с шагом, чтобы можно было разные шаги делать, а не только delta_t=1
-
+# TODO: разобраться с шагом, чтобы можно было разные шаги делать, а не только delta_t=1
 def process(time_begin, time_end, delta_t=1):
     satellite = construct_satellite(START_POS, START_VEL)
     with open('result.txt', 'w') as f:
         for i in range(int(time_end)):
-            time, x_eci, y_eci, z_eci, vel_x, vel_y, vel_z = satellite.get_params(
-                i)
-
+            out_data = satellite.get_params(i)
+            out_data = convert_data_to_str(out_data)
+            f.writelines(out_data)
             # velocity_X.append(float(vel_x))
             # velocity_Y.append(float(vel_y))
             # velocity_Z.append(float(vel_z))
             # coordinates_X.append(float(x_eci))
             # coordinates_Y.append(float(y_eci))
             # coordinates_Z.append(float(z_eci))
-            # f.write(julian_date)
-
 
 if __name__ == "__main__":
     process(TIME_BEGIN, TIME_END)

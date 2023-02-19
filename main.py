@@ -21,7 +21,7 @@ START_VEL = {'vel_x': 5356.39915538069,
 # velocity_X = []
 # velocity_Y = []
 # velocity_Z = []
-# Ecc = []
+#Ecc = []
 
 def process(time_begin, time_end, step=1):
     """
@@ -35,6 +35,8 @@ def process(time_begin, time_end, step=1):
     with open('result.txt', 'w') as f:
         for i in range(time_begin, time_end, step):
             out_data = satellite.get_params(i)
+            
+            # Ecc.append(satellite._orb_params._ecc_anomaly)
             # coordinates_X.append(out_data[1])
             # coordinates_Y.append(out_data[2])
             # coordinates_Z.append(out_data[3])
@@ -53,5 +55,5 @@ if __name__ == "__main__":
 #     ax.plot(coordinates_X, coordinates_Y, coordinates_Z)
 #     #ax.plot(vel_x, coordinates_Y, coordinates_Z)
 #    # plt.plot((coordinates_X, coordinates_Y)
-#    # plt.plot(Ecc)
-#     plt.show()
+# plt.plot(Ecc)
+# plt.show()

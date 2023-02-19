@@ -1,0 +1,4 @@
+numpy==1.16.2
+kepler.py==0.0.7
+pyquaternion==0.9.9
+pymap3d==1.7.15

@@ -65,8 +65,8 @@ class Satellite():
             vel_y (float): y - компонента скорости спутника в осях ИСК
             vel_z (float): z - компонента скорости спутника в осях ИСК
         """
-        vel_x, vel_y, vel_z = (np.sqrt(MU / self._orb_params._semi_major_axis) / (1 - self._orb_params._eccentricity * np.cos(self._orb_params._ecc_anomaly))) * (- self._transform_matrix) * np.sin(self._orb_params._ecc_anomaly) + self._transform_matrix1 * (
-            np.sqrt(1 - self._orb_params._eccentricity ** 2) * np.cos(self._orb_params._ecc_anomaly))
+        vel_x, vel_y, vel_z = (np.sqrt(MU / self._orb_params._semi_major_axis) / (1 - self._orb_params._eccentricity * np.cos(self._orb_params._ecc_anomaly))) * ((- self._transform_matrix) * np.sin(self._orb_params._ecc_anomaly) + self._transform_matrix1 * (
+            np.sqrt(1 - self._orb_params._eccentricity ** 2) * np.cos(self._orb_params._ecc_anomaly)))
 
         return float(vel_x), float(vel_y), float(vel_z)
 

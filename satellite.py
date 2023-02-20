@@ -136,7 +136,7 @@ class Satellite():
             time (float): время в секундах  
         """
         self._orb_params.update_anomaly(time)
-        self._current_time += time
+        self._current_time = time
         self.pos = count_position(self._orb_params._semi_major_axis,
             self._orb_params._ecc_anomaly, self._orb_params._eccentricity, self._transf_mat)
 
